@@ -41,7 +41,6 @@ module.exports = {
     resolve: {
       extensions: ['.ts'],
     },
-    // loaders
     module: {
       rules: [
         {
@@ -60,4 +59,8 @@ module.exports = {
     },
     plugins: [CopyWebpackPlugin(plugins)]
   },
+
+  transpileDependencies: [
+    'vuetify'
+  ]
 };

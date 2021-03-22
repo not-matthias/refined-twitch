@@ -1,5 +1,6 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
+const webpack = require("webpack");
 
 // Generate pages object
 //
@@ -34,6 +35,9 @@ module.exports = {
   filenameHashing: false,
   pages: pagesObj,
   configureWebpack: {
+    node: {
+      global: false
+    },
     entry: {
       background: './src/background/index.ts',
       content: './src/content/index.ts',
@@ -57,7 +61,12 @@ module.exports = {
         }
       ]
     },
-    plugins: [CopyWebpackPlugin(plugins)]
+    plugins: [
+      CopyWebpackPlugin(plugins),
+      new webpack.DefinePlugin({
+        global: "window"
+      })
+    ]
   },
 
   transpileDependencies: [

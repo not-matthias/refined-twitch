@@ -3,7 +3,9 @@
     <v-app-bar dark dense>
       <v-toolbar-title>Unhook Twitch</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon><v-icon>mdi-power</v-icon></v-btn>
+      <v-btn icon>
+        <v-icon>mdi-power</v-icon>
+      </v-btn>
 
       <template v-slot:extension>
         <v-tabs
@@ -23,23 +25,36 @@
     <v-tabs-items v-model="currentTab">
       <!-- General -->
       <v-tab-item>
-        <v-treeview selectable dense :items="items"></v-treeview>
-
-        <v-checkbox
-          v-model="config.general_config.show_followed_channels"
+        <v-treeview
+          v-model="config.generalItems"
+          :items="generalItems"
+          selectable
           dense
-          label="Hide Followed Channels"
-        ></v-checkbox>
-
-        <v-switch
-          v-model="config.general_config.show_recommendations"
-          dense
-          label="Hide Recommended"
-        ></v-switch>
+          @input="onSelectionChanged"
+        ></v-treeview>
       </v-tab-item>
 
-      <v-tab-item>2</v-tab-item>
-      <v-tab-item>3</v-tab-item>
+      <!-- Stream -->
+      <v-tab-item>
+        <v-treeview
+          v-model="config.streamItems"
+          :items="streamItems"
+          selectable
+          dense
+          @input="onSelectionChanged"
+        ></v-treeview>
+      </v-tab-item>
+
+      <!-- Misc -->
+      <v-tab-item>
+        <v-treeview
+          v-model="config.miscItems"
+          :items="miscItems"
+          selectable
+          dense
+          @input="onSelectionChanged"
+        ></v-treeview>
+      </v-tab-item>
     </v-tabs-items>
   </div>
 </template>
@@ -47,36 +62,180 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import {
+  ConfigIds,
   DEFAULT_CONFIG,
   IConfig,
   loadConfig,
   saveConfig,
 } from "@/shared/config";
+import { IEvent, IEventType } from "@/shared/event";
 
 @Component
 export default class Popup extends Vue {
-  private config: IConfig = DEFAULT_CONFIG;
-  private items = [
+  private oldConfig: IConfig = Object.assign({}, DEFAULT_CONFIG);
+  private config: IConfig = Object.assign({}, DEFAULT_CONFIG);
+  private currentTab = 0;
+
+  private generalItems = [
     {
-      id: 1,
-      name: "Applications :",
+      id: 1001,
+      name: "Left Sidebar",
       children: [
-        { id: 2, name: "Calendar" },
-        { id: 3, name: "Chrome" },
-        { id: 4, name: "Webstorm" },
+        { id: ConfigIds.FOLLOWED_CHANNELS, name: "Followed Channels" },
+        { id: ConfigIds.RECOMMENDED_CHANNELS, name: "Recommended Channels" },
+      ],
+    },
+    {
+      id: 1002,
+      name: "Header",
+      children: [
+        { id: ConfigIds.FOLLOWING, name: "Following" },
+        { id: ConfigIds.BROWSE, name: "Browse" },
+        { id: ConfigIds.PRIME_GAMING_LOOT, name: "Prime Gaming Loot" },
+        { id: ConfigIds.NOTIFICATIONS, name: "Notifications" },
       ],
     },
   ];
-  private currentTab = 0;
+  private streamItems = [
+    {
+      id: 101,
+      name: "Chat",
+      children: [
+        { id: ConfigIds.CHAT_WINDOW, name: "Chat Window" },
+        { id: ConfigIds.POLLS, name: "Polls" },
+        { id: ConfigIds.BETS, name: "Bets" },
+      ],
+    },
+    {
+      id: 102,
+      name: "Information",
+      children: [
+        { id: ConfigIds.VIEWER_COUNT, name: "Viewer Count" },
+        { id: ConfigIds.LIVE_TIME, name: "Live Time" },
+      ],
+    },
+    {
+      id: 103,
+      name: "Actions",
+      children: [
+        { id: ConfigIds.FOLLOW, name: "Follow" },
+        { id: ConfigIds.SUBSCRIBE, name: "Subscribe" },
+      ],
+    },
+    {
+      id: 104,
+      name: "Description",
+      children: [
+        { id: ConfigIds.STREAM_DESCRIPTION, name: "Stream Description" },
+        { id: ConfigIds.METADATA, name: "Metadata (Category, Team, Tags)" },
+      ],
+    },
+    {
+      id: ConfigIds.SOCIAL_MEDIA,
+      name: "Social Media",
+    },
+    {
+      id: ConfigIds.CHANNEL_PANEL,
+      name: "Channel Panel",
+    },
+    {
+      id: ConfigIds.EXTENSIONS,
+      name: "Extensions",
+    },
+  ];
+  private miscItems = [
+    {
+      id: 1,
+      name: "Picture in Picture",
+    },
+  ];
 
   async mounted() {
     this.config = await loadConfig();
+    this.oldConfig = await loadConfig();
   }
 
-  @Watch("config", { immediate: true, deep: true })
-  onConfigChanged(value: IConfig, oldValue: IConfig) {
+  onSelectionChanged(items: number[]): void {
+    // Save the config
+    //
     saveConfig(this.config);
+
+    // Create the events (has to be done here, because otherwise the old config could be set before the callback will be called)
+    //
+    const addedEvent = this.getAddedEvent();
+    const removedEvent = this.getRemovedEvent();
+
+    // Send the events
+    //
+    chrome.tabs.query({}, (tabs) => {
+      for (const tab of tabs) {
+        if (!tab.id) {
+          continue;
+        }
+
+        if (addedEvent) {
+          chrome.tabs.sendMessage(tab.id, addedEvent);
+        }
+
+        if (removedEvent) {
+          chrome.tabs.sendMessage(tab.id, removedEvent);
+        }
+      }
+    });
+
+    // Set the old config
+    //
+    this.oldConfig = Object.assign({}, this.config);
   }
+
+  getRemovedEvent(): IEvent | undefined {
+    const general = this.oldConfig.generalItems.filter(
+      (item) => !this.config.generalItems.includes(item)
+    );
+    const stream = this.oldConfig.streamItems.filter(
+      (item) => !this.config.streamItems.includes(item)
+    );
+    const misc = this.oldConfig.miscItems.filter(
+      (item) => !this.config.miscItems.includes(item)
+    );
+
+    const ids = general.concat(stream).concat(misc);
+    if (!ids.length) {
+      return;
+    }
+
+    return {
+      event_type: IEventType.Removed,
+      ids,
+    };
+  }
+
+  getAddedEvent(): IEvent | undefined {
+    const general = this.config.generalItems.filter(
+      (item) => !this.oldConfig.generalItems.includes(item)
+    );
+    const stream = this.config.streamItems.filter(
+      (item) => !this.oldConfig.streamItems.includes(item)
+    );
+    const misc = this.config.miscItems.filter(
+      (item) => !this.oldConfig.miscItems.includes(item)
+    );
+
+    const ids = general.concat(stream).concat(misc);
+    if (!ids.length) {
+      return;
+    }
+
+    return {
+      event_type: IEventType.Added,
+      ids,
+    };
+  }
+
+  // @Watch("config", { immediate: true, deep: true })
+  // onConfigChanged(value: IConfig, oldValue: IConfig) {
+  //   saveConfig(value);
+  // }
 }
 </script>
 

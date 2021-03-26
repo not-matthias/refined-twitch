@@ -1,19 +1,23 @@
-import { DEFAULT_CONFIG, IConfig, loadConfig } from "@/shared/config";
-
 console.log(`Content ${new Date().toString()}`)
 
+chrome.runtime.onMessage.addListener(request => {
+    console.log(request);
 
-let cachedConfig: IConfig | undefined = undefined;
-loadConfig().then((value) => {
-    cachedConfig = value;
-})
-
-chrome.storage.onChanged.addListener((changes, namespace) => {
-    for (const key in changes) {
-        console.log(changes[key].newValue);
-
-    }
+    // Callback
+    // sendResponse({ message: 'Content script has received that message ⚡' })
 });
+
+// let cachedConfig: IConfig | undefined = undefined;
+// loadConfig().then((value) => {
+//     cachedConfig = value;
+// })
+
+// chrome.storage.onChanged.addListener((changes, namespace) => {
+//     for (const key in changes) {
+//         console.log(changes[key].newValue);
+
+//     }
+// });
 
 // Side bar
 //

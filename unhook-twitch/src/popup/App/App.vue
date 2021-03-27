@@ -124,7 +124,7 @@ export default class Popup extends Vue {
     },
     {
       id: 104,
-      name: "Description",
+      name: "Channel Information",
       children: [
         { id: ConfigIds.STREAM_DESCRIPTION, name: "Stream Description" },
         { id: ConfigIds.METADATA, name: "Metadata (Category, Team, Tags)" },
@@ -155,7 +155,7 @@ export default class Popup extends Vue {
     this.oldConfig = await loadConfig();
   }
 
-  onSelectionChanged(items: number[]): void {
+  onSelectionChanged(): void {
     // Save the config
     //
     saveConfig(this.config);

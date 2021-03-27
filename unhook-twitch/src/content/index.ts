@@ -1,28 +1,101 @@
+import { IEvent, IEventType } from "@/shared/event";
+import { ConfigIds } from "@/shared/config";
+
 console.log(`Content ${new Date().toString()}`)
 
-chrome.runtime.onMessage.addListener(request => {
-    console.log(request);
-
-    // Callback
-    // sendResponse({ message: 'Content script has received that message ⚡' })
-});
-
-// let cachedConfig: IConfig | undefined = undefined;
-// loadConfig().then((value) => {
-//     cachedConfig = value;
-// })
-
-// chrome.storage.onChanged.addListener((changes, namespace) => {
+// chrome.storage.onChanged.addListener((changes) => {
 //     for (const key in changes) {
 //         console.log(changes[key].newValue);
-
 //     }
 // });
 
+chrome.runtime.onMessage.addListener((request: IEvent) => {
+    console.log("addListener");
+
+    const displayStyle = request.event_type == IEventType.Added ? "display: none !important" : "";
+    for (const id of request.ids) {
+        switch (id) {
+            // === General Config ===
+            //
+
+            // Left Sidebar
+            //
+            case ConfigIds.FOLLOWED_CHANNELS:
+                {
+                    const sidebar = document.querySelector("#sideNav .side-nav-section") as HTMLElement;
+                    sidebar.style.cssText = displayStyle;
+                    break;
+                }
+
+            case ConfigIds.RECOMMENDED_CHANNELS:
+                {
+                    const sidebar = document.querySelectorAll("#sideNav .side-nav-section")[1] as HTMLElement;
+                    sidebar.style.cssText = displayStyle;
+                    break;
+                }
+
+            // TODO: Online Friends
+            // TODO: Side Info Container
+
+            // Header
+            //
+            case ConfigIds.FOLLOWING:
+                break;
+            case ConfigIds.BROWSE:
+                break;
+            case ConfigIds.PRIME_GAMING_LOOT:
+                break;
+            case ConfigIds.NOTIFICATIONS:
+                break;
+
+
+            // === Stream Config ===
+            //
+
+            // Chat
+            //
+            case ConfigIds.CHAT_WINDOW:
+                break;
+            case ConfigIds.POLLS:
+                break;
+            case ConfigIds.BETS:
+                break;
+
+            // Information
+            //
+            case ConfigIds.VIEWER_COUNT:
+                break;
+            case ConfigIds.LIVE_TIME:
+                break;
+
+            // Actions
+            //
+            case ConfigIds.FOLLOW:
+                break;
+            case ConfigIds.SUBSCRIBE:
+                break;
+
+            // Description
+            //
+            case ConfigIds.STREAM_DESCRIPTION:
+                break;
+            case ConfigIds.METADATA:
+                break;
+
+            // Other
+            //
+            case ConfigIds.SOCIAL_MEDIA:
+                break;
+            case ConfigIds.CHANNEL_PANEL:
+                break;
+            case ConfigIds.EXTENSIONS:
+                break;
+        }
+    }
+});
+
 // Side bar
 //
-// const sidebar = document.querySelector("#sideNav");
-// sidebar?.remove();
 
 // Observe mutations
 //
@@ -75,7 +148,6 @@ observer.observe(document.body, {
 
 // Hide channel panels: 
 //      class="channel-panels"
-
 
 
 // Hide the entire channel info: `class="channel-info-content"/div[1]`

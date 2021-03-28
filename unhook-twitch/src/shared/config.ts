@@ -14,6 +14,13 @@ export enum ConfigIds {
     PRIME_GAMING_LOOT,
     NOTIFICATIONS,
 
+    // === Home Config ===
+    //
+    FRONT_PAGE_CAROUSEL,
+    RECOMMENDED_STREAMS,
+    RECOMMENDED_CATEGORIES,
+    RECOMMENDED_CLIPS,
+
     // === Stream Config ===
     // 
 
@@ -50,12 +57,14 @@ export enum ConfigIds {
  */
 export interface IConfig {
     generalItems: number[];
+    homeItems: number[];
     streamItems: number[];
     miscItems: number[];
 }
 
 export const DEFAULT_CONFIG: IConfig = {
     generalItems: [],
+    homeItems: [],
     streamItems: [],
     miscItems: []
 };

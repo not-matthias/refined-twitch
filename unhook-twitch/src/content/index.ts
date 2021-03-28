@@ -1,24 +1,23 @@
-import { IEvent, IEventType } from "@/shared/event";
-import { ConfigIds, loadConfig } from "@/shared/config";
-
-console.log(`Content ${new Date().toString()}`)
+import {IEvent, IEventType} from "@/shared/event";
+import {ConfigIds, loadConfig} from "@/shared/config";
 
 // Hide/Show all elements when loading the website
 //
 function initialize() {
     loadConfig().then(config => {
-        const handle = setInterval(() => {
-            const result = handleEvents({
-                event_type: IEventType.Added,
-                ids: config.generalItems.concat(config.streamItems).concat(config.miscItems)
-            } as IEvent);
+        // We cannot rerun this function, because some elements might only exist on certain pages. Because of that,
+        // this function will probably fail most of the time.
+        //
+        const result = handleEvents({
+            event_type: IEventType.Added,
+            ids: config.generalItems.concat(config.streamItems).concat(config.miscItems)
+        } as IEvent);
 
-            // Clear the interval or retry otherwise
-            //
-            if (result) {
-                clearInterval(handle);
-            }
-        }, 100);
+        if (result) {
+            console.log("[unhook-twitch] Successfully handled the events.");
+        } else {
+            console.log("[unhook-twitch] Failed to handle the events.");
+        }
     });
 }
 
@@ -31,7 +30,7 @@ initialize();
  * Finds the element for the specified settings.
  * @param id
  */
-function getElement(id: number): HTMLElement | null | undefined {
+function getElement(id: number): HTMLElement | null | undefined | HTMLElement[] {
     switch (id) {
         // === General Config ===
         //
@@ -43,9 +42,6 @@ function getElement(id: number): HTMLElement | null | undefined {
 
         case ConfigIds.RECOMMENDED_CHANNELS:
             return document.querySelectorAll("#sideNav .side-nav-section")[1] as HTMLElement;
-
-        // TODO: Online Friends
-        // TODO: Side Info Container
 
         // Header
         //
@@ -60,6 +56,47 @@ function getElement(id: number): HTMLElement | null | undefined {
 
         case ConfigIds.NOTIFICATIONS:
             return document.querySelector(".onsite-notifications") as HTMLElement;
+
+        // === Home Config ===
+        //
+            
+        case ConfigIds.FRONT_PAGE_CAROUSEL:
+            return document.querySelector(".front-page-carousel") as HTMLElement;
+
+        case ConfigIds.RECOMMENDED_STREAMS: {
+            const elements = [...document.querySelectorAll(".common-centered-column .find-me")]
+                .filter(item => {
+                    for (const link of item.querySelectorAll(".tw-link")) {
+                        // Streams start with `/<channel-name>`
+                        //
+                        if (link?.getAttribute("data-a-target") == "preview-card-image-link" && !(link as HTMLLinkElement).href.includes("clips.twitch.tv")) {
+                            return true;
+                        }
+                    }
+                });
+
+            return elements as HTMLElement[];
+        }
+
+        case ConfigIds.RECOMMENDED_CATEGORIES: {
+            const categoryGrid = document.querySelector(".common-centered-column .tw-mg-b-1") as HTMLElement;
+            const element = [...document.querySelectorAll(".common-centered-column .find-me")].find(value => value.querySelector(".tw-link")?.getAttribute("href") == "/directory") as HTMLElement;
+
+            return [categoryGrid, element];
+        }
+
+        case ConfigIds.RECOMMENDED_CLIPS: {
+            const element = [...document.querySelectorAll(".common-centered-column .find-me")]
+                .find(item => {
+                    for (const link of item.querySelectorAll(".tw-link")) {
+                        if (link?.getAttribute("data-a-target") == "preview-card-image-link" && (link as HTMLLinkElement).href.includes("clips.twitch.tv")) {
+                            return true;
+                        }
+                    }
+                });
+
+            return element as HTMLElement;
+        }
 
         // === Stream Config ===
         //
@@ -106,11 +143,10 @@ function getElement(id: number): HTMLElement | null | undefined {
         case ConfigIds.STREAM_DESCRIPTION:
             return [...document.querySelectorAll("h2")].find(value => value.getAttribute("data-a-target") == "stream-title") as HTMLElement;
 
-        case ConfigIds.METADATA:
-            {
-                const element = [...document.querySelectorAll(".tw-link")].find(value => value.getAttribute("data-a-target") == "stream-game-link") as HTMLElement;
-                return element?.parentElement?.parentElement;
-            }
+        case ConfigIds.METADATA: {
+            const element = [...document.querySelectorAll(".tw-link")].find(value => value.getAttribute("data-a-target") == "stream-game-link") as HTMLElement;
+            return element?.parentElement?.parentElement;
+        }
 
         // Other
         //
@@ -121,7 +157,7 @@ function getElement(id: number): HTMLElement | null | undefined {
             return document.querySelector(".channel-panels") as HTMLElement;
 
         case ConfigIds.EXTENSIONS:
-            return document.querySelector(".tw-c-text-overlay") as HTMLElement;
+            return document.querySelector(".video-player__overlay .tw-c-text-overlay") as HTMLElement;
     }
 }
 
@@ -131,21 +167,31 @@ function getElement(id: number): HTMLElement | null | undefined {
  * @returns False if an element could not be found. It is recommended to call this function again after a while so that the element could get loaded.
  */
 function handleEvents(request: IEvent): boolean {
-    console.log("addListener");
-
+    let status = true;
     for (const id of request.ids) {
-        const element = getElement(id);
+        let elements: HTMLElement[] = [];
 
-        // Hide or show the element
-        //
+        const element = getElement(id);
         if (element) {
-            element.style.cssText = request.event_type == IEventType.Added ? "display: none !important" : "";
+            // Set the elements list
+            //
+            if (element instanceof HTMLElement) {
+                elements = [element];
+            } else if (Array.isArray(element)) {
+                elements = element;
+            }
+
+            // Hide or show the elements
+            //
+            for (const element of elements) {
+                element.style.cssText = request.event_type == IEventType.Added ? "display: none !important" : "";
+            }
         } else {
-            return false;
+            status = false;
         }
     }
 
-    return true;
+    return status;
 }
 
 chrome.runtime.onMessage.addListener(handleEvents);
@@ -153,7 +199,7 @@ chrome.runtime.onMessage.addListener(handleEvents);
 // Observe mutations: 
 //
 // Listen for changes and hide all the enabled features. This is needed when switching to another stream,
-// because the elements will be loaded again and thus circumvent the initial initilization.
+// because the elements will be loaded again and thus circumvent the initial initialization.
 //
 const observer = new MutationObserver(() => {
     initialize();
@@ -162,25 +208,3 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, {
     childList: true
 });
-
-
-// Only hide messages: .scrollable-area __web-inspector-hide-shortcut__
-//      data-a-target="chat-scroller"
-
-
-// Hide entire chat room (also hides the 'Send' message button): 
-//      class="chat-room__content tw-c-text-base tw-flex tw-flex-column tw-flex-grow-1 tw-flex-nowrap tw-full-height tw-relative"
-//      data-test-selector="chat-room-component-layout"
-// => Also hides a lot of other stuff (polls, users list, ...)
-
-
-// Hide the entire channel info: `class="channel-info-content"/div[1]`
-
-// Hide viewer count: data-a-target="animated-channel-viewers-count"
-
-
-// Hide Extensions: class="extensions-video-overlay-size-container" 
-//      class="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-top-0 video-player__overlay __web-inspector-hide-shortcut__"
-
-// Hype train: .community-highlight
-// Gifted Subs Leaderboard: .channel-leaderboard

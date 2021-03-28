@@ -16,6 +16,7 @@
           align-with-title
         >
           <v-tab>General</v-tab>
+          <v-tab>Home</v-tab>
           <v-tab>Stream</v-tab>
           <v-tab>Misc</v-tab>
         </v-tabs>
@@ -31,6 +32,17 @@
           selectable
           dense
           @input="onSelectionChanged"
+        ></v-treeview>
+      </v-tab-item>
+
+      <!-- Home -->
+      <v-tab-item>
+        <v-treeview
+            v-model="config.homeItems"
+            :items="homeItems"
+            selectable
+            dense
+            @input="onSelectionChanged"
         ></v-treeview>
       </v-tab-item>
 
@@ -60,7 +72,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import {
   ConfigIds,
   DEFAULT_CONFIG,
@@ -93,6 +105,21 @@ export default class Popup extends Vue {
         { id: ConfigIds.BROWSE, name: "Browse" },
         { id: ConfigIds.PRIME_GAMING_LOOT, name: "Prime Gaming Loot" },
         { id: ConfigIds.NOTIFICATIONS, name: "Notifications" },
+      ],
+    },
+  ];
+  private homeItems = [
+    {
+      id: ConfigIds.FRONT_PAGE_CAROUSEL,
+      name: "Front Page Player",
+    },
+    {
+      id: 1003,
+      name: "Recommended Items",
+      children: [
+        { id: ConfigIds.RECOMMENDED_STREAMS, name: "Recommended Channels" },
+        { id: ConfigIds.RECOMMENDED_CATEGORIES, name: "Recommended Categories" },
+        { id: ConfigIds.RECOMMENDED_CLIPS, name: "Recommended Clips" },
       ],
     },
   ];
@@ -192,6 +219,9 @@ export default class Popup extends Vue {
     const general = this.oldConfig.generalItems.filter(
       (item) => !this.config.generalItems.includes(item)
     );
+    const home = this.oldConfig.homeItems.filter(
+        (item) => !this.config.homeItems.includes(item)
+    );
     const stream = this.oldConfig.streamItems.filter(
       (item) => !this.config.streamItems.includes(item)
     );
@@ -199,7 +229,7 @@ export default class Popup extends Vue {
       (item) => !this.config.miscItems.includes(item)
     );
 
-    const ids = general.concat(stream).concat(misc);
+    const ids = general.concat(home).concat(stream).concat(misc);
     if (!ids.length) {
       return;
     }
@@ -214,6 +244,9 @@ export default class Popup extends Vue {
     const general = this.config.generalItems.filter(
       (item) => !this.oldConfig.generalItems.includes(item)
     );
+    const home = this.config.homeItems.filter(
+        (item) => !this.oldConfig.homeItems.includes(item)
+    );
     const stream = this.config.streamItems.filter(
       (item) => !this.oldConfig.streamItems.includes(item)
     );
@@ -221,7 +254,7 @@ export default class Popup extends Vue {
       (item) => !this.oldConfig.miscItems.includes(item)
     );
 
-    const ids = general.concat(stream).concat(misc);
+    const ids = general.concat(home).concat(stream).concat(misc);
     if (!ids.length) {
       return;
     }
@@ -231,18 +264,11 @@ export default class Popup extends Vue {
       ids,
     };
   }
-
-  // @Watch("config", { immediate: true, deep: true })
-  // onConfigChanged(value: IConfig, oldValue: IConfig) {
-  //   saveConfig(value);
-  // }
 }
 </script>
-
 
 <style>
 body {
   width: 400px;
-  /* zoom: 80%; */
 }
 </style>

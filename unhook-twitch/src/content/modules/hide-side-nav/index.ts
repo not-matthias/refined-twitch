@@ -1,3 +1,6 @@
+import $ from 'jquery';
+import logger from "@/content/utils/logger"
+
 class HideSideNavModule {
     constructor() {
         // settings.add({
@@ -11,6 +14,11 @@ class HideSideNavModule {
       }
     
       load() {
+        logger.info("HideSideNavModule load");
+        $("body").toggleClass("custom-css-rule", true);
         // $('body').toggleClass('bttv-hide-bits', settings.get('hideBits'));
       }
 }
+
+
+export default new HideSideNavModule();

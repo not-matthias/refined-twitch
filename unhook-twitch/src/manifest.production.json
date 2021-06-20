@@ -9,8 +9,12 @@
     },
     "content_scripts": [
         {
+            "all_frames": true,
             "matches": [
                 "*://*.twitch.tv/*"
+            ],
+            "css": [
+                "css/features.css"
             ],
             "js": [
                 "js/content.js"

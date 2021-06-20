@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
+const { glob } = require("glob");
 
 // Generate pages object
 //
@@ -41,6 +42,7 @@ module.exports = {
     entry: {
       background: './src/background/index.ts',
       content: './src/content/index.ts',
+      features: glob.sync('./src/content/modules/**/*.css'),
     },
     resolve: {
       extensions: ['.ts'],

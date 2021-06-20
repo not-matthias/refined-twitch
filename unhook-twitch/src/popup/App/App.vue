@@ -81,6 +81,7 @@ import {
   saveConfig,
 } from "@/shared/config";
 import { IEvent, IEventType } from "@/shared/event";
+import OptionsSync from "webext-options-sync";
 
 @Component
 export default class Popup extends Vue {

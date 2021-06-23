@@ -184,17 +184,31 @@ export default class Popup extends Vue {
     this.oldConfig = (await settings.get("config")) || DEFAULT_CONFIG;
   }
 
-  async onSelectionChanged(elements: number[]) {
+  onSelectionChanged(elements: number[]) {
     // Save the config
     //
-    await settings.set("config", this.config);
+    // await settings.set("config", this.config);
 
     // Enable and disable all the features in the setting module
     //
     console.log("elements: ", elements);
     console.log("previousElements: ", this.previousElements);
 
-    const enabledFeatures: number[] = [];
+    let enabledFeatures: number[] = [];
+    for (const element of elements) {
+      // If the previous elemnts don't have this element, then it's new.
+      if (this.previousElements.indexOf(element) == -1) {
+        enabledFeatures.push(element);
+      }
+    }
+
+    let disabledFeatures: number[] = [];
+    for (const element of this.previousElements) {
+      // If the previous element doesn't exist currently, it has been removed.
+      if (elements.indexOf(element) == -1) {
+        disabledFeatures.push(element);
+      }
+    }
 
     // const enabledFeatures = elements.filter((i) => {
     //   console.log("[1] elements i: ", i);
@@ -202,15 +216,15 @@ export default class Popup extends Vue {
 
     //   return this.previousElements.indexOf(i) === -1;
     // });
-    const disabledFeatures = this.previousElements.filter((i) => {
-      console.log("[2] previousElements i: ", i);
-      console.log(
-        "[2] elements.indexOf(i): ",
-        this.previousElements.indexOf(i)
-      );
+    // const disabledFeatures = this.previousElements.filter((i) => {
+    //   console.log("[2] previousElements i: ", i);
+    //   console.log(
+    //     "[2] elements.indexOf(i): ",
+    //     this.previousElements.indexOf(i)
+    //   );
 
-      return elements.indexOf(i) === -1;
-    });
+    //   return elements.indexOf(i) === -1;
+    // });
 
     console.log("Enabling events: ", enabledFeatures);
     console.log("Disabling events: ", enabledFeatures);

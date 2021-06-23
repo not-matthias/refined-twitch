@@ -80,11 +80,8 @@ import logger from "@/content/utils/logger";
 
 @Component
 export default class Popup extends Vue {
-  private oldConfig: IConfig = Object.assign({}, DEFAULT_CONFIG);
   private config: IConfig = Object.assign({}, DEFAULT_CONFIG);
   private currentTab = 0;
-
-  private previousElements: number[] = [];
 
   // TODO: Try to replace the id with `item-key=name`
   private generalItems = [
@@ -181,53 +178,12 @@ export default class Popup extends Vue {
 
   async mounted() {
     this.config = (await settings.get("config")) || DEFAULT_CONFIG;
-    this.oldConfig = (await settings.get("config")) || DEFAULT_CONFIG;
   }
 
   onSelectionChanged(elements: number[]) {
     // Save the config
     //
-    // await settings.set("config", this.config);
-
-    // Enable and disable all the features in the setting module
-    //
-    console.log("elements: ", elements);
-    console.log("previousElements: ", this.previousElements);
-
-    let enabledFeatures: number[] = [];
-    for (const element of elements) {
-      // If the previous elemnts don't have this element, then it's new.
-      if (this.previousElements.indexOf(element) == -1) {
-        enabledFeatures.push(element);
-      }
-    }
-
-    let disabledFeatures: number[] = [];
-    for (const element of this.previousElements) {
-      // If the previous element doesn't exist currently, it has been removed.
-      if (elements.indexOf(element) == -1) {
-        disabledFeatures.push(element);
-      }
-    }
-
-    // const enabledFeatures = elements.filter((i) => {
-    //   console.log("[1] elements i: ", i);
-    //   console.log("[1] previousElements.indexOf(i): ", this.previousElements.indexOf(i));
-
-    //   return this.previousElements.indexOf(i) === -1;
-    // });
-    // const disabledFeatures = this.previousElements.filter((i) => {
-    //   console.log("[2] previousElements i: ", i);
-    //   console.log(
-    //     "[2] elements.indexOf(i): ",
-    //     this.previousElements.indexOf(i)
-    //   );
-
-    //   return elements.indexOf(i) === -1;
-    // });
-
-    console.log("Enabling events: ", enabledFeatures);
-    console.log("Disabling events: ", enabledFeatures);
+    settings.set("config", this.config);
 
     // We have to send the enabled/disabled events to the content script so that it can set it in the settings. If we
     // try to do it from the popup (here), it won't work.
@@ -238,26 +194,9 @@ export default class Popup extends Vue {
           continue;
         }
 
-        if (enabledFeatures.length) {
-          chrome.tabs.sendMessage(tab.id, {
-            event_type: IEventType.Enabled,
-            ids: enabledFeatures,
-          } as IEvent);
-        }
-
-        if (disabledFeatures.length) {
-          chrome.tabs.sendMessage(tab.id, {
-            event_type: IEventType.Disabled,
-            ids: disabledFeatures,
-          } as IEvent);
-        }
+      chrome.tabs.sendMessage(tab.id, elements);
       }
     });
-
-    // Set the old config
-    //
-    this.previousElements = elements;
-    this.oldConfig = Object.assign({}, this.config);
   }
 }
 </script>

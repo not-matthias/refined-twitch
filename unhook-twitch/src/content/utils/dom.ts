@@ -31,21 +31,10 @@ export function waitForElement(selector: string): Promise<Element> {
 
 export function useClass(class_name: string, should_show: boolean) {
     const body = $("body");
-    
-    body.toggleClass(class_name, should_show);
 
-    return;
-    const has_class = body.hasClass(class_name);
-
-    if (has_class && !should_show) {
-        console.log("Removing class: ", class_name);
-        
+    if (!should_show) {
         body.removeClass(class_name);
-    }
-    
-    if (!has_class && should_show) {
-        console.log("Adding class: ", class_name);
-
+    } else {
         body.addClass(class_name);
     }
 }

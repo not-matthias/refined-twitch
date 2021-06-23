@@ -1,17 +1,11 @@
+import $ from 'jquery';
 import logger from "@/content/utils/logger"
 import settings from '@/content/settings';
 import { ConfigIds } from '@/shared/config';
-import { useClass } from '@/content/utils/dom';
+import { useClass, waitForElement } from '@/content/utils/dom';
 
 class HideSideNavModule {
   constructor() {
-    // settings.add({
-    //   id: 'hideBits',
-    //   name: 'Hide Bits',
-    //   defaultValue: false,
-    //   description: "Disables bits in chat (we can't block 'em on stream, sry)",
-    // });
-
     settings.on(`changed.${ConfigIds.FOLLOWED_CHANNELS}`, () => this.hideFollowedChannels());
     settings.on(`changed.${ConfigIds.RECOMMENDED_CHANNELS}`, () => this.hideRecommendedChannels());
 
@@ -21,26 +15,30 @@ class HideSideNavModule {
   }
 
   hideFollowedChannels() {
-    console.log("[hideFollowedChannels]");
+    settings.get(ConfigIds.FOLLOWED_CHANNELS.toString()).then((enabled) => {
+      waitForElement("#sideNav .side-nav-section:nth-child(1)").then((element) => {
+        $(element).attr("style", enabled ? "display: none !important" : "");
+      });
+    });
 
     this.hideSideNav();
-    settings.get(ConfigIds.FOLLOWED_CHANNELS.toString()).then((value) => useClass("unlock-twitch-hide-followed-channels ", value));
+    // settings.get(ConfigIds.FOLLOWED_CHANNELS.toString()).then((value) => useClass("unlock-twitch-hide-followed-channels ", value));
   }
 
   hideRecommendedChannels() {
-    console.log("[hideRecommendedChannels]");
+    settings.get(ConfigIds.RECOMMENDED_CHANNELS.toString()).then((enabled) => {
+      waitForElement("#sideNav .side-nav-section:nth-child(2)").then((element) => {
+        $(element).attr("style", enabled ? "display: none !important" : "");
+      });
+    });
 
     this.hideSideNav();
-    settings.get(ConfigIds.RECOMMENDED_CHANNELS.toString()).then((value) => useClass("unlock-twitch-hide-recommended-channels ", value));
+    // settings.get(ConfigIds.RECOMMENDED_CHANNELS.toString()).then((value) => useClass("unlock-twitch-hide-recommended-channels ", value));
   }
 
   hideSideNav() {
-    console.log("[hideSideNav]");
-
     settings.get(ConfigIds.FOLLOWED_CHANNELS.toString()).then((hideFollowedChannels) => {
       settings.get(ConfigIds.RECOMMENDED_CHANNELS.toString()).then((hideRecommedChannels) => {
-        console.log(`hide-side-nav: hideFollowedChannels=${hideFollowedChannels} hideRecommedChannels=${hideRecommedChannels}`);
-        
         useClass("unlock-twitch-hide-side-nav", hideFollowedChannels && hideRecommedChannels)
       });
     });

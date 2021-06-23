@@ -1,3 +1,11 @@
-.custom-css-rule {
+.unlock-twitch-hide-recommended-channels #sideNav .side-nav-section:nth-child(1) {
+    display: none !important;
+}
+
+.unlock-twitch-hide-recommended-channels #sideNav .side-nav-section:nth-child(2) {
+    display: none !important;
+}
+
+.unlock-twitch-hide-side-nav #sideNav {
     display: none !important;
 }

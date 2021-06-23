@@ -1,5 +1,4 @@
 import { EventEmitter } from "events";
-import OptionsSync from "webext-options-sync";
 
 class Settings extends EventEmitter {
     public get(key: string): Promise<any> {
@@ -7,7 +6,7 @@ class Settings extends EventEmitter {
             chrome.storage.sync.get(key, result =>
                 chrome.runtime.lastError
                     ? reject(Error(chrome.runtime.lastError.message))
-                    : resolve(result)
+                    : resolve(result[key])
             )
         );
     }

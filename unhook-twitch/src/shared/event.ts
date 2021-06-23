@@ -1,6 +1,6 @@
 export enum IEventType {
-    Added,
-    Removed
+    Enabled,
+    Disabled
 }
 
 export interface IEvent {

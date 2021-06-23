@@ -12,14 +12,15 @@ class Settings extends EventEmitter {
     }
 
     public set(key: string, value: any): Promise<void> {
-        this.emit(`changed.${key}`, value);
-
         return new Promise((resolve, reject) =>
-            chrome.storage.sync.set({ [key]: value }, () =>
-                chrome.runtime.lastError
-                    ? reject(Error(chrome.runtime.lastError.message))
-                    : resolve()
-            )
+            chrome.storage.sync.set({ [key]: value }, () => {
+                if (chrome.runtime.lastError) {
+                    reject(Error(chrome.runtime.lastError.message));
+                } else {
+                    this.emit(`changed.${key}`, value);
+                    resolve();
+                }
+            })
         );
     }
 }

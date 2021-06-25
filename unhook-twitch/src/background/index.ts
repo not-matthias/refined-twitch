@@ -1,34 +1,11 @@
-console.log("Background script")
-
-// Wait for `https://gql.twitch.tv/gql` web requests
-
-let currentUrl = '';
-let tabId;
+import { ILoadEvent } from "@/shared/event";
 
 /**
- * 
+ * Wait for `https://gql.twitch.tv/gql` web requests
  */
 chrome.webRequest.onCompleted.addListener(
-    function (details) {
-        const parsedUrl = new URL(details.url);
-
-        if (currentUrl && currentUrl.indexOf(parsedUrl.pathname) > -1 && tabId) {
-            chrome.tabs.sendMessage(tabId, { type: MessageType.PAGE_RENDERED });
-        }
-    },
-    { urls: ['*://*.github.com/*'] }
-);
-
-chrome.webNavigation.onHistoryStateUpdated.addListener(
     details => {
-        tabId = details.tabId;
-        currentUrl = details.url;
+        chrome.tabs.sendMessage(details.tabId, { type: "load", url: details.url } as ILoadEvent);
     },
-    {
-        url: [
-            {
-                hostSuffix: 'github.com'
-            }
-        ]
-    }
+    { urls: ["*://gql.twitch.tv/*"] }
 );

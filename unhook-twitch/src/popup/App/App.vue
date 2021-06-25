@@ -74,7 +74,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { ConfigIds, DEFAULT_CONFIG, IConfig } from "@/shared/config";
-import { IEvent, IEventType } from "@/shared/event";
+import { IFeatureEvent } from "@/shared/event";
 import settings from "@/content/settings";
 import logger from "@/content/utils/logger";
 
@@ -194,7 +194,7 @@ export default class Popup extends Vue {
           continue;
         }
 
-      chrome.tabs.sendMessage(tab.id, elements);
+      chrome.tabs.sendMessage(tab.id, { type: "feature", ids: elements } as IFeatureEvent );
       }
     });
   }

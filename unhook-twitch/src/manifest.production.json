@@ -26,10 +26,13 @@
         "scripts": [
             "js/background.js"
         ],
-        "persistent": false
+        "persistent": true
     },
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "webRequest", 
+        "webNavigation",
+        "*://*.twitch.tv/*"
     ]
 }

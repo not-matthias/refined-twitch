@@ -2,6 +2,7 @@ import $ from 'jquery';
 import settings from '@/content/settings';
 import { ConfigIds } from '@/shared/config';
 import { useClass, waitForElement } from '@/content/utils/dom';
+import siteLoad from '@/content/watcher/site-load';
 
 class HideHeaderModule {
     constructor() {
@@ -10,6 +11,11 @@ class HideHeaderModule {
         settings.on(`changed.${ConfigIds.PRIME_GAMING_LOOT}`, () => this.hidePrimeGamingLoot());
         settings.on(`changed.${ConfigIds.NOTIFICATIONS}`, () => this.hideNotifications());
 
+        siteLoad.onLoaded(() => this.onLoaded());
+        this.onLoaded();
+    }
+
+    onLoaded() {
         this.hideFollowing();
         this.hideBrowse();
         this.hidePrimeGamingLoot();
@@ -23,7 +29,6 @@ class HideHeaderModule {
     hideBrowse() {
         settings.get(ConfigIds.BROWSE.toString()).then((value) => useClass("unlock-twitch-hide-browse", value));
     }
-
 
     hidePrimeGamingLoot() {
         settings.get(ConfigIds.PRIME_GAMING_LOOT.toString()).then((value) => useClass("unlock-twitch-hide-prime-offers", value));

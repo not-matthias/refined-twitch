@@ -2,20 +2,24 @@ import $ from 'jquery';
 import settings from '@/content/settings';
 import { ConfigIds } from '@/shared/config';
 import { listenForElement, useClass, waitForElement, waitForElements } from '@/content/utils/dom';
+import siteLoad from '@/content/watcher/site-load';
 
-class HideHeaderModule {
+class HideHomeModule {
     constructor() {
         settings.on(`changed.${ConfigIds.FRONT_PAGE_CAROUSEL}`, () => this.hideCarousel());
         settings.on(`changed.${ConfigIds.RECOMMENDED_STREAMS}`, () => this.hideRecommendedStreams());
         settings.on(`changed.${ConfigIds.RECOMMENDED_CATEGORIES}`, () => this.hideRecommendedCategories());
         settings.on(`changed.${ConfigIds.RECOMMENDED_CLIPS}`, () => this.hideRecommendedClips());
 
+        siteLoad.onLoaded(() => this.onLoaded());
+        this.onLoaded();
+    }
+
+    onLoaded() {
         this.hideCarousel();
         this.hideRecommendedStreams();
         this.hideRecommendedCategories();
         this.hideRecommendedClips();
-
-        listenForElement(".common-centered-column .find-me", () => console.log("element loaded"));
     }
 
     hideCarousel() {
@@ -81,5 +85,4 @@ class HideHeaderModule {
 
 }
 
-
-export default new HideHeaderModule();
+export default new HideHomeModule();

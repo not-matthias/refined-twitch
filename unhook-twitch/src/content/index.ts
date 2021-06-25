@@ -1,19 +1,31 @@
-import { IEventType, IEvent } from "@/shared/event";
+import { IEvent } from "@/shared/event";
 import "./modules"
 import settings from "./settings";
-import Watcher from './watcher';
-
-new Watcher().setup();
+import siteLoad from "./watcher/site-load";
+import logger from "@/content/utils/logger"
 
 let previousElements: number[] = [];
-chrome.runtime.onMessage.addListener((elements: number[]) => {
-    console.log("Received elements: ", elements);
+chrome.runtime.onMessage.addListener((event: IEvent) => {
+    switch (event.type) {
+        case "load":
+            {
+                siteLoad.loaded();
+                break;
+            }
 
-    const enabledFeatures = elements.filter((i) => previousElements.indexOf(i) === -1);
-    const disabledFeatures = previousElements.filter((i) => elements.indexOf(i) === -1);
-    
-    enabledFeatures.forEach((id) => settings.set(id.toString(), true));
-    disabledFeatures.forEach((id) => settings.set(id.toString(), false));
+        case "feature":
+            {
+                const enabledFeatures = event.ids.filter((i) => previousElements.indexOf(i) === -1);
+                const disabledFeatures = previousElements.filter((i) => event.ids.indexOf(i) === -1);
 
-    previousElements = elements;
+                enabledFeatures.forEach((id) => settings.set(id.toString(), true));
+                disabledFeatures.forEach((id) => settings.set(id.toString(), false));
+
+                previousElements = event.ids;
+                break;
+            }
+        default:
+            logger.error("Failed to handle event: ", JSON.stringify(event));
+
+    }
 });

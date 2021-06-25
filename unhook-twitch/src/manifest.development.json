@@ -9,8 +9,12 @@
     },
     "content_scripts": [
         {
+            "all_frames": true,
             "matches": [
                 "*://*.twitch.tv/*"
+            ],
+            "css": [
+                "css/features.css"
             ],
             "js": [
                 "js/content.js"
@@ -22,11 +26,14 @@
         "scripts": [
             "js/background.js"
         ],
-        "persistent": false
+        "persistent": true
     },
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "webRequest", 
+        "webNavigation",
+        "*://*.twitch.tv/*"
     ],
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

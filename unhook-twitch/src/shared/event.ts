@@ -1,9 +1,11 @@
-export enum IEventType {
-    Added,
-    Removed
-}
-
-export interface IEvent {
-    event_type: IEventType;
+export interface IFeatureEvent {
+    type: "feature",
     ids: number[]
 }
+
+export interface ILoadEvent {
+    type: "load",
+    url: string
+}
+
+export type IEvent = ILoadEvent | IFeatureEvent;

@@ -38,11 +38,11 @@
       <!-- Home -->
       <v-tab-item>
         <v-treeview
-            v-model="config.homeItems"
-            :items="homeItems"
-            selectable
-            dense
-            @input="onSelectionChanged"
+          v-model="config.homeItems"
+          :items="homeItems"
+          selectable
+          dense
+          @input="onSelectionChanged"
         ></v-treeview>
       </v-tab-item>
 
@@ -73,21 +73,17 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import {
-  ConfigIds,
-  DEFAULT_CONFIG,
-  IConfig,
-  loadConfig,
-  saveConfig,
-} from "@/shared/config";
-import { IEvent, IEventType } from "@/shared/event";
+import { ConfigIds, DEFAULT_CONFIG, IConfig } from "@/shared/config";
+import { IFeatureEvent } from "@/shared/event";
+import settings from "@/content/settings";
+import logger from "@/content/utils/logger";
 
 @Component
 export default class Popup extends Vue {
-  private oldConfig: IConfig = Object.assign({}, DEFAULT_CONFIG);
   private config: IConfig = Object.assign({}, DEFAULT_CONFIG);
   private currentTab = 0;
 
+  // TODO: Try to replace the id with `item-key=name`
   private generalItems = [
     {
       id: 1001,
@@ -118,7 +114,10 @@ export default class Popup extends Vue {
       name: "Recommended Items",
       children: [
         { id: ConfigIds.RECOMMENDED_STREAMS, name: "Recommended Channels" },
-        { id: ConfigIds.RECOMMENDED_CATEGORIES, name: "Recommended Categories" },
+        {
+          id: ConfigIds.RECOMMENDED_CATEGORIES,
+          name: "Recommended Categories",
+        },
         { id: ConfigIds.RECOMMENDED_CLIPS, name: "Recommended Clips" },
       ],
     },
@@ -178,21 +177,16 @@ export default class Popup extends Vue {
   ];
 
   async mounted() {
-    this.config = await loadConfig();
-    this.oldConfig = await loadConfig();
+    this.config = (await settings.get("config")) || DEFAULT_CONFIG;
   }
 
-  onSelectionChanged(): void {
+  onSelectionChanged(elements: number[]) {
     // Save the config
     //
-    saveConfig(this.config);
+    settings.set("config", this.config);
 
-    // Create the events (has to be done here, because otherwise the old config could be set before the callback will be called)
-    //
-    const addedEvent = this.getAddedEvent();
-    const removedEvent = this.getRemovedEvent();
-
-    // Send the events
+    // We have to send the enabled/disabled events to the content script so that it can set it in the settings. If we
+    // try to do it from the popup (here), it won't work.
     //
     chrome.tabs.query({}, (tabs) => {
       for (const tab of tabs) {
@@ -200,69 +194,9 @@ export default class Popup extends Vue {
           continue;
         }
 
-        if (addedEvent) {
-          chrome.tabs.sendMessage(tab.id, addedEvent);
-        }
-
-        if (removedEvent) {
-          chrome.tabs.sendMessage(tab.id, removedEvent);
-        }
+      chrome.tabs.sendMessage(tab.id, { type: "feature", ids: elements } as IFeatureEvent );
       }
     });
-
-    // Set the old config
-    //
-    this.oldConfig = Object.assign({}, this.config);
-  }
-
-  getRemovedEvent(): IEvent | undefined {
-    const general = this.oldConfig.generalItems.filter(
-      (item) => !this.config.generalItems.includes(item)
-    );
-    const home = this.oldConfig.homeItems.filter(
-        (item) => !this.config.homeItems.includes(item)
-    );
-    const stream = this.oldConfig.streamItems.filter(
-      (item) => !this.config.streamItems.includes(item)
-    );
-    const misc = this.oldConfig.miscItems.filter(
-      (item) => !this.config.miscItems.includes(item)
-    );
-
-    const ids = general.concat(home).concat(stream).concat(misc);
-    if (!ids.length) {
-      return;
-    }
-
-    return {
-      event_type: IEventType.Removed,
-      ids,
-    };
-  }
-
-  getAddedEvent(): IEvent | undefined {
-    const general = this.config.generalItems.filter(
-      (item) => !this.oldConfig.generalItems.includes(item)
-    );
-    const home = this.config.homeItems.filter(
-        (item) => !this.oldConfig.homeItems.includes(item)
-    );
-    const stream = this.config.streamItems.filter(
-      (item) => !this.oldConfig.streamItems.includes(item)
-    );
-    const misc = this.config.miscItems.filter(
-      (item) => !this.oldConfig.miscItems.includes(item)
-    );
-
-    const ids = general.concat(home).concat(stream).concat(misc);
-    if (!ids.length) {
-      return;
-    }
-
-    return {
-      event_type: IEventType.Added,
-      ids,
-    };
   }
 }
 </script>

@@ -10,16 +10,22 @@
   },
   "dependencies": {
     "@mdi/font": "^5.9.55",
+    "consola": "^2.15.3",
     "core-js": "^3.6.5",
+    "events": "^3.3.0",
+    "jquery": "^3.6.0",
     "roboto-fontface": "^0.10.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",
-    "vuetify": "^2.4.0"
+    "vuetify": "^2.4.0",
+    "webext-options-sync": "^2.0.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.75",
+    "@types/events": "^3.0.0",
+    "@types/jquery": "^3.5.5",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -31,6 +37,7 @@
     "copy-webpack-plugin": "^4.6.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "glob": "^7.1.7",
     "sass": "^1.32.0",
     "sass-loader": "^10.0.0",
     "ts-loader": "^8.0.18",

@@ -26,7 +26,7 @@ class HideHomeModule {
         settings.get(ConfigIds.FRONT_PAGE_CAROUSEL.toString()).then((value) => {
             // Always pause the video
             //
-            waitForElement("button[data-a-target=\"player-play-pause-button\"]").then(element => {
+            waitForElement(".front-page-carousel button[data-a-target=\"player-play-pause-button\"]").then(element => {
                 if ($(element).attr("data-a-player-state") == "playing") {
                     (element as HTMLButtonElement).click();
                 }

@@ -68,18 +68,3 @@ export const DEFAULT_CONFIG: IConfig = {
     streamItems: [],
     miscItems: []
 };
-
-export const loadConfig: () => Promise<IConfig> = () => new Promise((resolve) =>
-    chrome.storage.sync.get("config", result => {
-        // Set the value if undefined
-        //
-        if (!result || !result.config) {
-            return resolve(Object.assign({}, DEFAULT_CONFIG));
-        }
-
-        return resolve(result.config);
-    }));
-
-export const saveConfig = (config: IConfig): void => {
-    chrome.storage.sync.set({ config: config });
-}

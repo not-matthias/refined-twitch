@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import settings from '@/content/settings';
 import { ConfigIds } from '@/shared/config';
-import { useClass, waitForElement, waitForElements } from '@/content/utils/dom';
+import { useClass, waitForElement } from '@/content/utils/dom';
 import siteLoad from '@/content/watcher/site-load';
 
 class HideHomeModule {
@@ -62,7 +62,7 @@ class HideHomeModule {
      * @param linkContent the content that the link has to start with
      */
     hidePanel(enabled: boolean, linkContent: string, dataATargetValue: string) {
-        waitForElements(".common-centered-column .find-me").then(() => {
+        waitForElement(".common-centered-column .find-me").then(() => {
             [...document.querySelectorAll(".common-centered-column .find-me")]
                 .forEach(item => {
                     for (const link of item.querySelectorAll(".tw-link")) {

@@ -26,7 +26,7 @@ class HideSideNavModule {
         $(element).attr("style", enabled ? "display: none !important" : "");
       });
     });
-
+    
     this.hideSideNav();
     // settings.get(ConfigIds.FOLLOWED_CHANNELS.toString()).then((value) => useClass("unlock-twitch-hide-followed-channels ", value));
   }

@@ -37,7 +37,6 @@ class HideHeaderModule {
     hideNotifications() {
         settings.get(ConfigIds.NOTIFICATIONS.toString()).then((value) => useClass("unlock-twitch-hide-notifications", value));
     }
-
 }
 
 

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import settings from '@/content/settings';
 import { ConfigIds } from '@/shared/config';
-import { listenForElement, useClass, waitForElement, waitForElements } from '@/content/utils/dom';
+import { useClass, waitForElement, waitForElements } from '@/content/utils/dom';
 import siteLoad from '@/content/watcher/site-load';
 
 class HideHomeModule {
@@ -38,51 +38,41 @@ class HideHomeModule {
 
     hideRecommendedStreams() {
         settings.get(ConfigIds.RECOMMENDED_STREAMS.toString()).then(enabled => {
-
-            waitForElements(".common-centered-column .find-me").then(() => {
-                [...document.querySelectorAll(".common-centered-column .find-me")]
-                    .forEach(item => {
-                        for (const link of item.querySelectorAll(".tw-link")) {
-                            // Streams start with `/<channel-name>`
-                            //
-                            if (link?.getAttribute("data-a-target") == "preview-card-image-link" && !(link as HTMLLinkElement).href.includes("clips.twitch.tv")) {
-                                $(item).attr("style", enabled ? "display: none !important" : "");
-                            }
-                        }
-                    });
-            });
+            // `/<channel_name>`
+            this.hidePanel(enabled, "/", "preview-card-image-link");
         });
     }
 
     hideRecommendedCategories() {
-        settings.get(ConfigIds.RECOMMENDED_CATEGORIES.toString()).then((value) => useClass("unlock-twitch-hide-browse", value));
-
-        // case ConfigIds.RECOMMENDED_CATEGORIES: {
-        //     const categoryGrid = document.querySelector(".common-centered-column .tw-mg-b-1") as HTMLElement;
-        //     const element = [...document.querySelectorAll(".common-centered-column .find-me")].find(value => value.querySelector(".tw-link")?.getAttribute("href") == "/directory") as HTMLElement;
-
-        //     return [categoryGrid, element];
-        // }
-
+        settings.get(ConfigIds.RECOMMENDED_CATEGORIES.toString()).then(enabled => {
+            this.hidePanel(enabled, "/directory", "card-");
+        });
     }
 
     hideRecommendedClips() {
-        settings.get(ConfigIds.RECOMMENDED_CLIPS.toString()).then((value) => useClass("unlock-twitch-hide-notifications", value));
-
-        // case ConfigIds.RECOMMENDED_CLIPS: {
-        //     const element = [...document.querySelectorAll(".common-centered-column .find-me")]
-        //         .find(item => {
-        //             for (const link of item.querySelectorAll(".tw-link")) {
-        //                 if (link?.getAttribute("data-a-target") == "preview-card-image-link" && (link as HTMLLinkElement).href.includes("clips.twitch.tv")) {
-        //                     return true;
-        //                 }
-        //             }
-        //         });
-
-        //     return element as HTMLElement;
-        // }
+        settings.get(ConfigIds.RECOMMENDED_CLIPS.toString()).then(enabled => {
+            this.hidePanel(enabled, "https://clips.twitch.tv", "preview-card-image-link");
+        });
     }
 
+    /**
+     * Hides a certain panel based on the link style.
+     * @param enabled whether the panel should be hidden or visible
+     * @param dataATargetValue the value that the `data-a-target` attribute for the link has to start with
+     * @param linkContent the content that the link has to start with
+     */
+    hidePanel(enabled: boolean, linkContent: string, dataATargetValue: string) {
+        waitForElements(".common-centered-column .find-me").then(() => {
+            [...document.querySelectorAll(".common-centered-column .find-me")]
+                .forEach(item => {
+                    for (const link of item.querySelectorAll(".tw-link")) {
+                        if (link?.getAttribute("data-a-target")?.startsWith(dataATargetValue) && (link as HTMLLinkElement).getAttribute("href")?.startsWith(linkContent)) {
+                            $(item).attr("style", enabled ? "display: none !important" : "display: block");
+                        }
+                    }
+                });
+        });
+    }
 }
 
 export default new HideHomeModule();

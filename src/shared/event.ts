@@ -1,5 +1,6 @@
 export interface IFeatureEvent {
     type: "feature",
+    treeviewId: number,
     ids: number[]
 }
 

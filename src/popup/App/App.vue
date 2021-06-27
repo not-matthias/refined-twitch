@@ -31,7 +31,7 @@
           :items="generalItems"
           selectable
           dense
-          @input="onSelectionChanged"
+          @input="(ids) => onSelectionChanged(0, ids)"
         ></v-treeview>
       </v-tab-item>
 
@@ -42,7 +42,7 @@
           :items="homeItems"
           selectable
           dense
-          @input="onSelectionChanged"
+          @input="(ids) => onSelectionChanged(1, ids)"
         ></v-treeview>
       </v-tab-item>
 
@@ -53,7 +53,7 @@
           :items="streamItems"
           selectable
           dense
-          @input="onSelectionChanged"
+          @input="(ids) => onSelectionChanged(2, ids)"
         ></v-treeview>
       </v-tab-item>
 
@@ -64,7 +64,7 @@
           :items="miscItems"
           selectable
           dense
-          @input="onSelectionChanged"
+          @input="(ids) => onSelectionChanged(3, ids)"
         ></v-treeview>
       </v-tab-item>
     </v-tabs-items>
@@ -86,7 +86,7 @@ export default class Popup extends Vue {
   // TODO: Try to replace the id with `item-key=name`
   private generalItems = [
     {
-      id: 1001,
+      id: 1111,
       name: "Left Sidebar",
       children: [
         { id: ConfigIds.FOLLOWED_CHANNELS, name: "Followed Channels" },
@@ -94,7 +94,7 @@ export default class Popup extends Vue {
       ],
     },
     {
-      id: 1002,
+      id: 1112,
       name: "Header",
       children: [
         { id: ConfigIds.FOLLOWING, name: "Following" },
@@ -110,7 +110,7 @@ export default class Popup extends Vue {
       name: "Front Page Player",
     },
     {
-      id: 1003,
+      id: 2221,
       name: "Recommended Items",
       children: [
         { id: ConfigIds.RECOMMENDED_STREAMS, name: "Recommended Channels" },
@@ -124,7 +124,7 @@ export default class Popup extends Vue {
   ];
   private streamItems = [
     {
-      id: 101,
+      id: 3331,
       name: "Chat",
       children: [
         { id: ConfigIds.CHAT_WINDOW, name: "Chat Window" },
@@ -133,7 +133,7 @@ export default class Popup extends Vue {
       ],
     },
     {
-      id: 102,
+      id: 3332,
       name: "Information",
       children: [
         { id: ConfigIds.VIEWER_COUNT, name: "Viewer Count" },
@@ -141,7 +141,7 @@ export default class Popup extends Vue {
       ],
     },
     {
-      id: 103,
+      id: 3333,
       name: "Actions",
       children: [
         { id: ConfigIds.FOLLOW, name: "Follow" },
@@ -149,7 +149,7 @@ export default class Popup extends Vue {
       ],
     },
     {
-      id: 104,
+      id: 3334,
       name: "Channel Information",
       children: [
         { id: ConfigIds.STREAM_DESCRIPTION, name: "Stream Description" },
@@ -171,7 +171,7 @@ export default class Popup extends Vue {
   ];
   private miscItems = [
     {
-      id: 1,
+      id: 4444,
       name: "Picture in Picture",
     },
   ];
@@ -180,7 +180,7 @@ export default class Popup extends Vue {
     this.config = (await settings.get("config")) || DEFAULT_CONFIG;
   }
 
-  onSelectionChanged(elements: number[]) {
+  onSelectionChanged(treeviewId: number, elements: number[]) {
     // Save the config
     //
     settings.set("config", this.config);
@@ -194,7 +194,11 @@ export default class Popup extends Vue {
           continue;
         }
 
-      chrome.tabs.sendMessage(tab.id, { type: "feature", ids: elements } as IFeatureEvent );
+        chrome.tabs.sendMessage(tab.id, {
+          type: "feature",
+          treeviewId: treeviewId,
+          ids: elements,
+        } as IFeatureEvent);
       }
     });
   }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-app-bar dark dense>
-      <v-toolbar-title>Unhook Twitch</v-toolbar-title>
+      <v-toolbar-title>Refined Twitch</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon>
         <v-icon>mdi-power</v-icon>
@@ -127,6 +127,7 @@ export default class Popup extends Vue {
       name: "Chat",
       children: [
         { id: ConfigIds.CHAT_WINDOW, name: "Chat Window" },
+        { id: ConfigIds.CHANNEL_LEADERBOARD, name: "Leaderboard" },
         { id: ConfigIds.POLLS, name: "Polls" },
         { id: ConfigIds.BETS, name: "Bets" },
       ],

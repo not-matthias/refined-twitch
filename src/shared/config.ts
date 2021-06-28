@@ -26,6 +26,7 @@ export enum ConfigIds {
     // Chat
     //
     CHAT_WINDOW,
+    CHANNEL_LEADERBOARD,
     POLLS,
     BETS,
 

@@ -8,6 +8,7 @@ import siteLoad from '@/content/watcher/site-load';
 class HideStreamModule {
     constructor() {
         settings.on(`changed.${ConfigIds.CHAT_WINDOW}`, () => this.hideChat());
+        settings.on(`changed.${ConfigIds.CHANNEL_LEADERBOARD}`, () => this.hideLeaderboard());
         settings.on(`changed.${ConfigIds.POLLS}`, () => this.hidePolls());
         settings.on(`changed.${ConfigIds.BETS}`, () => this.hideBets());
         settings.on(`changed.${ConfigIds.VIEWER_COUNT}`, () => this.hideViewerCount());
@@ -26,6 +27,7 @@ class HideStreamModule {
 
     onLoaded() {
         this.hideChat();
+        this.hideLeaderboard();
         this.hidePolls();
         this.hideBets();
         this.hideViewerCount();
@@ -42,6 +44,14 @@ class HideStreamModule {
     hideChat() {
         settings.get(ConfigIds.CHAT_WINDOW.toString()).then((enabled) => {
             waitForElement(".chat-shell .stream-chat").then((element) => {
+                $(element).attr("style", enabled ? "display: none !important" : "");
+            });
+        });
+    }
+
+    hideLeaderboard() {
+        settings.get(ConfigIds.CHANNEL_LEADERBOARD.toString()).then((enabled) => {
+            waitForElement(".channel-leaderboard").then((element) => {
                 $(element).attr("style", enabled ? "display: none !important" : "");
             });
         });

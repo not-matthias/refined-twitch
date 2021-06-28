@@ -8,7 +8,7 @@ import logger from "@/content/utils/logger"
 //
 // This is needed because different treeviews will not send the 
 // already enabled items of other treeviews. For more information see 
-// https://github.com/not-matthias/unhook-twitch/issues/7
+// https://github.com/not-matthias/refined-twitch/issues/7
 // 
 const previousElements: number[][] = [];
 chrome.runtime.onMessage.addListener((event: IEvent) => {

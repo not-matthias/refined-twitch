@@ -18,7 +18,6 @@
           <v-tab>General</v-tab>
           <v-tab>Home</v-tab>
           <v-tab>Stream</v-tab>
-          <v-tab>Misc</v-tab>
         </v-tabs>
       </template>
     </v-app-bar>
@@ -54,17 +53,6 @@
           selectable
           dense
           @input="(ids) => onSelectionChanged(2, ids)"
-        ></v-treeview>
-      </v-tab-item>
-
-      <!-- Misc -->
-      <v-tab-item>
-        <v-treeview
-          v-model="config.miscItems"
-          :items="miscItems"
-          selectable
-          dense
-          @input="(ids) => onSelectionChanged(3, ids)"
         ></v-treeview>
       </v-tab-item>
     </v-tabs-items>
@@ -167,12 +155,6 @@ export default class Popup extends Vue {
     {
       id: ConfigIds.EXTENSIONS,
       name: "Extensions",
-    },
-  ];
-  private miscItems = [
-    {
-      id: 4444,
-      name: "Picture in Picture",
     },
   ];
 

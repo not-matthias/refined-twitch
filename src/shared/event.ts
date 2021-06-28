@@ -9,4 +9,9 @@ export interface ILoadEvent {
     url: string
 }
 
-export type IEvent = ILoadEvent | IFeatureEvent;
+export interface IExtensionStatusEvent {
+    type: "extension",
+    enabled: boolean
+}
+
+export type IEvent = ILoadEvent | IFeatureEvent | IExtensionStatusEvent;

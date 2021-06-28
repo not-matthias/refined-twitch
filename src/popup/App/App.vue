@@ -3,11 +3,11 @@
     <v-app-bar dark dense>
       <v-toolbar-title>Refined Twitch</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon>
+      <v-btn icon @click="onPowerButtonClicked">
         <v-icon>mdi-power</v-icon>
       </v-btn>
 
-      <template v-slot:extension>
+      <template v-slot:extension v-if="extensionEnabled">
         <v-tabs
           v-model="currentTab"
           fixed-tabs
@@ -22,47 +22,57 @@
       </template>
     </v-app-bar>
 
-    <v-tabs-items v-model="currentTab">
-      <!-- General -->
-      <v-tab-item>
-        <v-treeview
-          v-model="config.generalItems"
-          :items="generalItems"
-          selectable
-          dense
-          @input="(ids) => onSelectionChanged(0, ids)"
-        ></v-treeview>
-      </v-tab-item>
+    <div v-if="extensionEnabled">
+      <v-tabs-items v-model="currentTab">
+        <!-- General -->
+        <v-tab-item>
+          <v-treeview
+            v-model="config.generalItems"
+            :items="generalItems"
+            selectable
+            dense
+            @input="(ids) => onSelectionChanged(0, ids)"
+          ></v-treeview>
+        </v-tab-item>
 
-      <!-- Home -->
-      <v-tab-item>
-        <v-treeview
-          v-model="config.homeItems"
-          :items="homeItems"
-          selectable
-          dense
-          @input="(ids) => onSelectionChanged(1, ids)"
-        ></v-treeview>
-      </v-tab-item>
+        <!-- Home -->
+        <v-tab-item>
+          <v-treeview
+            v-model="config.homeItems"
+            :items="homeItems"
+            selectable
+            dense
+            @input="(ids) => onSelectionChanged(1, ids)"
+          ></v-treeview>
+        </v-tab-item>
 
-      <!-- Stream -->
-      <v-tab-item>
-        <v-treeview
-          v-model="config.streamItems"
-          :items="streamItems"
-          selectable
-          dense
-          @input="(ids) => onSelectionChanged(2, ids)"
-        ></v-treeview>
-      </v-tab-item>
-    </v-tabs-items>
+        <!-- Stream -->
+        <v-tab-item>
+          <v-treeview
+            v-model="config.streamItems"
+            :items="streamItems"
+            selectable
+            dense
+            @input="(ids) => onSelectionChanged(2, ids)"
+          ></v-treeview>
+        </v-tab-item>
+      </v-tabs-items>
+    </div>
+
+    <div v-else>
+      <div align="center">
+        <v-container>
+          <h1 class="ma-5 pa-5 font-weight-thin">Extension not enabled</h1>
+        </v-container>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { ConfigIds, DEFAULT_CONFIG, IConfig } from "@/shared/config";
-import { IFeatureEvent } from "@/shared/event";
+import { IExtensionStatusEvent, IFeatureEvent } from "@/shared/event";
 import settings from "@/content/settings";
 import logger from "@/content/utils/logger";
 
@@ -162,6 +172,25 @@ export default class Popup extends Vue {
     this.config = (await settings.get("config")) || DEFAULT_CONFIG;
   }
 
+  onPowerButtonClicked() {
+    this.extensionEnabled = !this.extensionEnabled;
+
+    // Enable/disable the extension
+    //
+    chrome.tabs.query({}, (tabs) => {
+      for (const tab of tabs) {
+        if (!tab.id) {
+          continue;
+        }
+
+        chrome.tabs.sendMessage(tab.id, {
+          type: "extension",
+          enabled: this.extensionEnabled,
+        } as IExtensionStatusEvent);
+      }
+    });
+  }
+
   onSelectionChanged(treeviewId: number, elements: number[]) {
     // Save the config
     //
@@ -183,6 +212,14 @@ export default class Popup extends Vue {
         } as IFeatureEvent);
       }
     });
+  }
+
+  get extensionEnabled() {
+    return this.config.extensionEnabled;
+  }
+
+  set extensionEnabled(value: boolean) {
+    this.config.extensionEnabled = value;
   }
 }
 </script>

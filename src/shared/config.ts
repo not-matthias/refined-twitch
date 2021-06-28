@@ -56,6 +56,7 @@ export enum ConfigIds {
  * The config with all the selected item ids.
  */
 export interface IConfig {
+    extensionEnabled: boolean,
     generalItems: number[];
     homeItems: number[];
     streamItems: number[];
@@ -63,6 +64,7 @@ export interface IConfig {
 }
 
 export const DEFAULT_CONFIG: IConfig = {
+    extensionEnabled: true,
     generalItems: [],
     homeItems: [],
     streamItems: [],

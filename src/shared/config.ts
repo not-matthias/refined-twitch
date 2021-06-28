@@ -9,10 +9,9 @@ export enum ConfigIds {
 
     // Header
     //
-    FOLLOWING,
-    BROWSE,
-    PRIME_GAMING_LOOT,
-    NOTIFICATIONS,
+    HEADER_LEFT,
+    HEADER_SEARCH,
+    HEADER_RIGHT,
 
     // === Home Config ===
     //

@@ -97,10 +97,9 @@ export default class Popup extends Vue {
       id: 1112,
       name: "Header",
       children: [
-        { id: ConfigIds.FOLLOWING, name: "Following" },
-        { id: ConfigIds.BROWSE, name: "Browse" },
-        { id: ConfigIds.PRIME_GAMING_LOOT, name: "Prime Gaming Loot" },
-        { id: ConfigIds.NOTIFICATIONS, name: "Notifications" },
+        { id: ConfigIds.HEADER_LEFT, name: "Left" },
+        { id: ConfigIds.HEADER_SEARCH, name: "Search" },
+        { id: ConfigIds.HEADER_RIGHT, name: "Right" },
       ],
     },
   ];

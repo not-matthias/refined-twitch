@@ -81,7 +81,6 @@ export default class Popup extends Vue {
   private config: IConfig = Object.assign({}, DEFAULT_CONFIG);
   private currentTab = 0;
 
-  // TODO: Try to replace the id with `item-key=name`
   private generalItems = [
     {
       id: 1111,

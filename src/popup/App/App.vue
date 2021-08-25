@@ -178,7 +178,7 @@ export default class Popup extends Vue {
     //
     settings.set("config", this.config);
 
-    // Enable/disable the extension
+    // Enable/disable the extension for each tab
     //
     chrome.tabs.query({}, (tabs) => {
       for (const tab of tabs) {

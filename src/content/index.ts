@@ -4,10 +4,6 @@ import settings from "./settings";
 import siteLoad from "./watcher/site-load";
 import logger from "@/content/utils/logger"
 
-
-// let previousElements: number[][] = [];
-// let backupElements: number[][] = [];
-
 chrome.runtime.onMessage.addListener(async (event: IEvent) => {
     // Retrieve the previous and backup elements. 
     //

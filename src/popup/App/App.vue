@@ -174,6 +174,10 @@ export default class Popup extends Vue {
   onPowerButtonClicked() {
     this.extensionEnabled = !this.extensionEnabled;
 
+    // Save the config
+    //
+    settings.set("config", this.config);
+
     // Enable/disable the extension
     //
     chrome.tabs.query({}, (tabs) => {

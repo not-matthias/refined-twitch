@@ -4,16 +4,22 @@ import settings from "./settings";
 import siteLoad from "./watcher/site-load";
 import logger from "@/content/utils/logger"
 
-// Definition is the following: [treeview_id][ids]
-//
-// This is needed because different treeviews will not send the 
-// already enabled items of other treeviews. For more information see 
-// https://github.com/not-matthias/refined-twitch/issues/7
-// 
-let previousElements: number[][] = [];
-let backupElements: number[][] = [];
 
-chrome.runtime.onMessage.addListener((event: IEvent) => {
+// let previousElements: number[][] = [];
+// let backupElements: number[][] = [];
+
+chrome.runtime.onMessage.addListener(async (event: IEvent) => {
+    // Retrieve the previous and backup elements. 
+    //
+    // Definition is the following: [treeview_id][ids]
+    //
+    // This is needed because different treeviews will not send the 
+    // already enabled items of other treeviews. For more information see 
+    // https://github.com/not-matthias/refined-twitch/issues/7
+    // 
+    let previousElements: number[][] = await settings.get("previousElements") || [];
+    let backupElements: number[][] = await settings.get("backupElements") || [];
+
     switch (event.type) {
         case "load":
             {
@@ -54,6 +60,8 @@ chrome.runtime.onMessage.addListener((event: IEvent) => {
 
         default:
             logger.error("Failed to handle event: ", JSON.stringify(event));
-
     }
+
+    settings.set("previousElements", previousElements);
+    settings.set("backupElements", backupElements);
 });
